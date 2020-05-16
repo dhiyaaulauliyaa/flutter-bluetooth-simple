@@ -35,7 +35,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   StreamSubscription<bool> _scanStatus;
   bool _isScanning;
-  Map<Guid, bool> _isListening = Map<Guid, bool>();
+
+  StreamSubscription<List<int>> _listener;
+  bool _isListening;
 
   final _writeController = TextEditingController();
 
@@ -89,13 +91,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _readFromDevice(BluetoothCharacteristic characteristic) async {
-    var sub = characteristic.value.listen((value) {
-      setState(() {
-        widget.readValues[characteristic.uuid] = value;
-      });
+    List<int> value = await characteristic.read();
+    setState(() {
+      widget.readValues[characteristic.uuid] = value;
     });
-    await characteristic.read();
-    sub.cancel();
   }
 
   void _writeToDevice(BluetoothCharacteristic characteristic) async {
@@ -109,7 +108,10 @@ class _MyHomePageState extends State<MyHomePage> {
             FlatButton(
               child: Text("Send"),
               onPressed: () {
-                characteristic.write(utf8.encode(_writeController.value.text));
+                characteristic.write(
+                  utf8.encode(_writeController.value.text),
+                  withoutResponse: true,
+                );
                 Navigator.pop(context);
               },
             ),
@@ -126,13 +128,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _getNotifierFromDevice(BluetoothCharacteristic characteristic) async {
-    print('masuk');
-    var sub = characteristic.value.listen((value) {
-      widget.readValues[characteristic.uuid] = value;
-      print('Receiving: ' + widget.readValues[characteristic.uuid].toString());
+    /* Bluetooth notifying toggle */
+    await characteristic.setNotifyValue(!characteristic.isNotifying);
+    setState(() {
+      _isListening = characteristic.isNotifying;
     });
-    await characteristic.setNotifyValue(true);
-    sub.cancel();
+
+    /* Update the value */
+    if (_isListening) {
+      _listener = characteristic.value.listen((value) {
+        setState(() {
+          widget.readValues[characteristic.uuid] = value;
+        });
+      });
+    }
+
+    /* Stop listening */
+    else
+      _listener.cancel();
   }
 
   @override
@@ -140,6 +153,8 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
 
     _isScanning = false;
+    _isListening = false;
+
     _scanStatus = widget.flutterBlue.isScanning.listen((event) {
       setState(() {
         _isScanning = event;
@@ -190,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> {
           FlatButton(
             color: Colors.white10,
             child: Text('Read'),
-            onPressed: () => _readFromDevice(characteristic),
+            onPressed: _isListening ? null : () =>  _readFromDevice(characteristic),
           ),
         );
       }
@@ -207,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
         buttons.add(
           FlatButton(
             color: Colors.white10,
-            child: Text('Notify'),
+            child: Text(_isListening ? 'Stop Notifying' : 'Notify'),
             onPressed: () => _getNotifierFromDevice(characteristic),
           ),
         );
@@ -225,13 +240,8 @@ class _MyHomePageState extends State<MyHomePage> {
         List<Column> characteristicsList = List<Column>();
         for (BluetoothCharacteristic characteristic
             in service.characteristics) {
-          // characteristic.value.listen((value) {
-          //   print(value);
-          // });
-
           String valueReceived =
               widget.readValues[characteristic.uuid].toString();
-          print(valueReceived);
 
           characteristicsList.add(
             Column(
