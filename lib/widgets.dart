@@ -6,7 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
 class ScanResultTile extends StatelessWidget {
-  const ScanResultTile({Key key, this.result, this.onTap}) : super(key: key);
+  const ScanResultTile({
+    Key key,
+    this.result,
+    this.onTap,
+  }) : super(key: key);
 
   final ScanResult result;
   final VoidCallback onTap;
@@ -48,7 +52,7 @@ class ScanResultTile extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .caption
-                  .apply(color: Colors.black),
+                  .apply(color: Colors.white),
               softWrap: true,
             ),
           ),
@@ -98,15 +102,21 @@ class ScanResultTile extends StatelessWidget {
       ),
       children: <Widget>[
         _buildAdvRow(
-            context, 'Complete Local Name', result.advertisementData.localName),
-        _buildAdvRow(context, 'Tx Power Level',
-            '${result.advertisementData.txPowerLevel ?? 'N/A'}'),
+          context,
+          'Complete Local Name',
+          result.advertisementData.localName,
+        ),
         _buildAdvRow(
-            context,
-            'Manufacturer Data',
-            getNiceManufacturerData(
-                    result.advertisementData.manufacturerData) ??
-                'N/A'),
+          context,
+          'Tx Power Level',
+          '${result.advertisementData.txPowerLevel ?? 'N/A'}',
+        ),
+        _buildAdvRow(
+          context,
+          'Manufacturer Data',
+          getNiceManufacturerData(result.advertisementData.manufacturerData) ??
+              'N/A',
+        ),
         _buildAdvRow(
             context,
             'Service UUIDs',
@@ -178,7 +188,7 @@ class CharacteristicTile extends StatelessWidget {
     return StreamBuilder<List<int>>(
       stream: characteristic.value,
       initialData: characteristic.lastValue,
-      builder: (c, snapshot) {
+      builder: (ctx, snapshot) {
         final value = snapshot.data;
         return ExpansionTile(
           title: ListTile(
@@ -188,12 +198,13 @@ class CharacteristicTile extends StatelessWidget {
               children: <Widget>[
                 Text('Characteristic'),
                 Text(
-                    '0x${characteristic.uuid.toString().toUpperCase().substring(4, 8)}',
-                    style: Theme.of(context).textTheme.bodyText2.copyWith(
-                        color: Theme.of(context).textTheme.caption.color))
+                  '0x${characteristic.uuid.toString().toUpperCase().substring(4, 8)}',
+                  style: Theme.of(context).textTheme.bodyText2.copyWith(
+                      color: Theme.of(context).textTheme.caption.color),
+                )
               ],
             ),
-            subtitle: Text(value.toString()),
+            subtitle: Text('Value Received: ' + value.toString()),
             contentPadding: EdgeInsets.all(0.0),
           ),
           trailing: Row(
@@ -207,16 +218,17 @@ class CharacteristicTile extends StatelessWidget {
                 onPressed: onReadPressed,
               ),
               IconButton(
-                icon: Icon(Icons.file_upload,
-                    color: Theme.of(context).iconTheme.color.withOpacity(0.5)),
+                icon: Icon(
+                  Icons.file_upload,
+                  color: Theme.of(context).iconTheme.color.withOpacity(0.5),
+                ),
                 onPressed: onWritePressed,
               ),
               IconButton(
                 icon: Icon(
-                    characteristic.isNotifying
-                        ? Icons.sync_disabled
-                        : Icons.sync,
-                    color: Theme.of(context).iconTheme.color.withOpacity(0.5)),
+                  characteristic.isNotifying ? Icons.sync_disabled : Icons.sync,
+                  color: Theme.of(context).iconTheme.color.withOpacity(0.5),
+                ),
                 onPressed: onNotificationPressed,
               )
             ],
