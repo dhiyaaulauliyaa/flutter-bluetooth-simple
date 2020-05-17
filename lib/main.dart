@@ -39,6 +39,9 @@ class _MyHomePageState extends State<MyHomePage> {
   StreamSubscription<List<int>> _listener;
   bool _isListening;
 
+  String _val1 = '??';
+  String _val2 = '??';
+
   final _writeController = TextEditingController();
 
   /* Add bluetooth device(s) to list */
@@ -148,6 +151,19 @@ class _MyHomePageState extends State<MyHomePage> {
       _listener.cancel();
   }
 
+  _dataParser(String data) {
+    print('parser');
+    if (data.isNotEmpty) {
+      var data1 = data.split(",")[0];
+      var data2 = data.split(",")[1];
+
+      setState(() {
+        _val1 = data1;
+        _val2 = data2;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -205,7 +221,8 @@ class _MyHomePageState extends State<MyHomePage> {
           FlatButton(
             color: Colors.white10,
             child: Text('Read'),
-            onPressed: _isListening ? null : () =>  _readFromDevice(characteristic),
+            onPressed:
+                _isListening ? null : () => _readFromDevice(characteristic),
           ),
         );
       }
@@ -243,6 +260,12 @@ class _MyHomePageState extends State<MyHomePage> {
           String valueReceived =
               widget.readValues[characteristic.uuid].toString();
 
+          if (valueReceived != 'null') {
+            print('receive: $valueReceived');
+            final decoded = utf8.decode(widget.readValues[characteristic.uuid]);
+            _dataParser(decoded);
+          }
+
           characteristicsList.add(
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,6 +282,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     : Text(
                         'Value Received: ' + valueReceived,
                       ),
+                valueReceived == 'null' ? SizedBox() : Text('Val 1: ' + _val1),
+                valueReceived == 'null' ? SizedBox() : Text('Val 2: ' + _val2),
                 SizedBox(
                   height: valueReceived == null ? 0 : 8.0,
                 ),
