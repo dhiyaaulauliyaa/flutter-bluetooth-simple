@@ -95,9 +95,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _readFromDevice(BluetoothCharacteristic characteristic) async {
     List<int> value = await characteristic.read();
-    setState(() {
-      widget.readValues[characteristic.uuid] = value;
-    });
+    String parsed = String.fromCharCodes(value);
+    print(parsed);
+    // setState(() {
+    //   widget.readValues[characteristic.uuid] = value;
+    // });
   }
 
   void _writeToDevice(BluetoothCharacteristic characteristic) async {
@@ -231,7 +233,21 @@ class _MyHomePageState extends State<MyHomePage> {
           FlatButton(
             color: Colors.white10,
             child: Text('Write'),
-            onPressed: () => _writeToDevice(characteristic),
+            // onPressed: () => _writeToDevice(characteristic),
+            onPressed: () {
+              String ssid = 'randomssid';
+              String pass = 'test123456';
+              String text = '$ssid, $pass';
+
+              print('Printing $text');
+
+              characteristic.write(
+                utf8.encode(text),
+                withoutResponse: false,
+              );
+
+            
+            },
           ),
         );
       }
