@@ -1,0 +1,10 @@
+FLUTTER
+1. UI sync
+2. Bluetooth functionality (continous read write)
+
+NODE
+1. Automasi konek wifi
+2. fungsi onReadRequest continous
+3. fungsi download from API 
+4. fungsi extract zip
+5. fungsi install 

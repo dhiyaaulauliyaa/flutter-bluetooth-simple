@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   final FlutterBlue flutterBlue = FlutterBlue.instance;
-  final List<BluetoothDevice> devicesList = List<BluetoothDevice>();
+  final List<BluetoothDevice> devicesList = <BluetoothDevice>[];
   final Map<Guid, List<int>> readValues = Map<Guid, List<int>>();
 
   @override
@@ -49,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (!widget.devicesList.contains(device)) {
       setState(() {
         widget.devicesList.add(device);
+        print(device.name);
       });
     }
   }
@@ -110,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text("Write"),
           content: TextField(controller: _writeController),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text("Send"),
               onPressed: () {
                 characteristic.write(
@@ -120,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pop(context);
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text("Cancel"),
               onPressed: () {
                 Navigator.pop(context);
@@ -200,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
             String deviceName = widget.devicesList[index].name;
             return ListTile(
               title: Text(deviceName == '' ? 'Unknown Device' : deviceName),
-              trailing: RaisedButton(
+              trailing: ElevatedButton(
                 child: Text('Connect'),
                 onPressed: () {
                   _connectToDevice(widget.devicesList[index]);
@@ -214,14 +215,17 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     /* Button for Write, Read, or Notify */
-    List<FlatButton> _characteristicsAction(
+    List<TextButton> _characteristicsAction(
         BluetoothCharacteristic characteristic) {
-      List<FlatButton> buttons = new List<FlatButton>();
+      List<TextButton> buttons = <TextButton>[];
 
       if (characteristic.properties.read) {
         buttons.add(
-          FlatButton(
-            color: Colors.white10,
+          TextButton(
+            style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.all(Colors.white),
+                backgroundColor: MaterialStateProperty.all(Colors.black54),
+                ),
             child: Text('Read'),
             onPressed:
                 _isListening ? null : () => _readFromDevice(characteristic),
@@ -230,8 +234,11 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       if (characteristic.properties.write) {
         buttons.add(
-          FlatButton(
-            color: Colors.white10,
+          TextButton(
+            style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.all(Colors.white),
+                backgroundColor: MaterialStateProperty.all(Colors.black54),
+                ),
             child: Text('Write'),
             // onPressed: () => _writeToDevice(characteristic),
             onPressed: () {
@@ -245,16 +252,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 utf8.encode(text),
                 withoutResponse: false,
               );
-
-            
             },
           ),
         );
       }
       if (characteristic.properties.notify) {
         buttons.add(
-          FlatButton(
-            color: Colors.white10,
+          TextButton(
+            style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.all(Colors.white),
+                backgroundColor: MaterialStateProperty.all(Colors.black54),
+                ),
             child: Text(_isListening ? 'Stop Notifying' : 'Notify'),
             onPressed: () => _getNotifierFromDevice(characteristic),
           ),
@@ -267,10 +275,10 @@ class _MyHomePageState extends State<MyHomePage> {
     /* Connected BLE Device details */
     SliverToBoxAdapter _connectedDeviceWidget() {
       /* Make list for every service */
-      List<ExpansionTile> servicesList = List<ExpansionTile>();
+      List<ExpansionTile> servicesList = <ExpansionTile>[];
       for (BluetoothService service in _services) {
         /* Make list for characteristic in every service */
-        List<Column> characteristicsList = List<Column>();
+        List<Column> characteristicsList = <Column>[];
         for (BluetoothCharacteristic characteristic
             in service.characteristics) {
           String valueReceived =
