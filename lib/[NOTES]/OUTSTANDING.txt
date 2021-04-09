@@ -1,10 +1,12 @@
-FLUTTER
-1. UI sync
-2. Bluetooth functionality (continous read write)
+Flutter
+1. [AD] UI sync 
+2. [DR] Bluetooth functionality (continous read write)
+3. [DR] Access Point
 
-NODE
-1. Automasi konek wifi
-2. fungsi onReadRequest continous
-3. fungsi download from API 
-4. fungsi extract zip
-5. fungsi install 
+RaspberryPi
+1. [MA] Automasi konek wifi
+2. [DR] fungsi onReadRequest continous
+3. [MA] fungsi download from API 
+4. [MA] fungsi extract zip
+5. [MA] fungsi install 
+6. [MA] Ubah wifi di raspi dari AP ke wifi biasa 
